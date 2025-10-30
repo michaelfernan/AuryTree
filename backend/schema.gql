@@ -81,6 +81,13 @@ input CreatePaymentInput {
   source: PaymentSource
 }
 
+input CreateUserInput {
+  email: String!
+  name: String!
+  password: String!
+  role: UserRole
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -149,6 +156,11 @@ enum InvoiceType {
   SAIDA
 }
 
+input LoginInput {
+  email: String!
+  password: String!
+}
+
 type Mutation {
   """Cria uma nova empresa"""
   createCompany(input: CreateCompanyInput!): CompanyType!
@@ -156,16 +168,21 @@ type Mutation {
   createExpense(input: CreateExpenseInput!): Expense!
   createInvoice(input: CreateInvoiceInput!): Invoice!
   createPayment(input: CreatePaymentInput!): Payment!
+  createUser(input: CreateUserInput!): User!
 
   """Remove uma empresa pelo ID"""
   deleteCompany(id: ID!): Boolean!
   deletePayment(id: ID!): Boolean!
+  deleteUser(id: ID!): Boolean!
   generatePayroll(companyId: ID!, competence: String!): [PayrollItem!]!
+  login(input: LoginInput!): String!
+  register(input: RegisterInput!): Boolean!
 
   """Atualiza dados de uma empresa existente"""
   updateCompany(input: UpdateCompanyInput!): CompanyType!
   updateEmployee(input: UpdateEmployeeInput!): Employee!
   updatePayment(input: UpdatePaymentInput!): Payment!
+  updateUser(input: UpdateUserInput!): User!
 }
 
 type Payment {
@@ -216,13 +233,22 @@ type Query {
 
   """Busca uma empresa pelo ID"""
   company(id: ID!): CompanyType
-  employees(companyId: ID!): [Employee!]!
+  employees: [Employee!]!
   expenses(companyId: ID!): [Expense!]!
   invoices(companyId: ID!): [Invoice!]!
   payment(id: ID!): Payment
   payments(companyId: ID!): [Payment!]!
   payrollItem(id: ID!): PayrollItem
   payrollItems(companyId: ID!): [PayrollItem!]!
+  user(id: ID!): User!
+  users: [User!]!
+  whoami: String!
+}
+
+input RegisterInput {
+  email: String!
+  name: String!
+  password: String!
 }
 
 """Dados para atualização de uma empresa existente"""
@@ -267,6 +293,14 @@ input UpdatePaymentInput {
   netAmount: String
   paidAt: String
   source: PaymentSource
+}
+
+input UpdateUserInput {
+  email: String
+  id: String!
+  name: String
+  password: String
+  role: UserRole
 }
 
 type User {

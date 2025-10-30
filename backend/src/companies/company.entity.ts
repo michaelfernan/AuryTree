@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
 } from "typeorm";
 import { ObjectType, Field, ID } from "@nestjs/graphql";
-import { User } from "../entities/user.entity";
+import { User } from "../users/user.entity";
 import { Employee } from "../employees/employee.entity";
 import { Invoice } from "../invoices/invoice.entity";
 import { Expense } from "../expenses/expense.entity";

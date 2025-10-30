@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Company } from "../companies/company.entity";
-import { User } from "../entities/user.entity";
+import { User } from "../users/user.entity";
 import { PayrollItem } from "../payroll/payroll-item.entity";
 import { Payment } from "../payments/payment.entity";
 import { ObjectType, Field, ID } from "@nestjs/graphql";

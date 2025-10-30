@@ -1,3 +1,4 @@
+// backend/src/app.module.ts
 import { Module } from "@nestjs/common";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
@@ -7,7 +8,7 @@ import { join } from "path";
 
 // 🧱 ENTIDADES
 import { Company } from "./companies/company.entity";
-import { User } from "./entities/user.entity";
+import { User } from "./users/user.entity";
 import { Employee } from "./employees/employee.entity";
 import { Invoice } from "./invoices/invoice.entity";
 import { Expense } from "./expenses/expense.entity";
@@ -26,6 +27,13 @@ import { ExpenseService } from "./expenses/expense.service";
 import { PaymentResolver } from "./payments/payment.resolver";
 import { PaymentService } from "./payments/payment.service";
 
+// 🔐 AUTH (JWT)
+import { AuthModule } from "./auth/auth.module";
+
+// ▶️ USERS (direto no AppModule)
+import { UserService } from "./users/user.service";
+import { UserResolver } from "./users/user.resolver";
+
 // 🧩 PAYROLL
 import { PayrollItemService } from "./payroll/payroll-item.service";
 import { PayrollResolver } from "./payroll/payroll-item.resolver";
@@ -42,12 +50,13 @@ import { PayrollResolver } from "./payroll/payroll-item.resolver";
       autoSchemaFile: join(process.cwd(), "schema.gql"),
       playground: true,
       sortSchema: true,
+      context: ({ req }) => ({ req }),
     }),
 
     TypeOrmModule.forRoot({
       type: "postgres",
       url: process.env.DATABASE_URL,
-      synchronize: true, // ⚠️ apenas em DEV
+      synchronize: true,
       autoLoadEntities: true,
       logging: true,
     }),
@@ -61,6 +70,8 @@ import { PayrollResolver } from "./payroll/payroll-item.resolver";
       Payment,
       PayrollItem,
     ]),
+
+    AuthModule,
   ],
 
   providers: [
@@ -76,9 +87,12 @@ import { PayrollResolver } from "./payroll/payroll-item.resolver";
     PaymentResolver,
     PaymentService,
 
+    // Users
+    UserResolver,
+    UserService,
+
     // Payroll
-    PayrollResolver,       // generatePayroll mutation
-    PayrollResolver,   // queries: payrollItems, payrollItem
+    PayrollResolver,
     PayrollItemService,
   ],
 })

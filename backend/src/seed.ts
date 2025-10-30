@@ -1,54 +1,59 @@
 import "dotenv/config";
-import { DataSource } from "typeorm";
-import * as bcrypt from "bcrypt";
-
-import ormconfig from "../ormconfig"; // DataSource
+import * as bcrypt from "bcryptjs";
+import ormconfig from "../ormconfig"; // já é DataSource
 import { Company } from "./companies/company.entity";
-import { User, UserRole } from "./entities/user.entity"; // << importa o enum
+import { User, UserRole } from "./users/user.entity";
 import { Employee } from "./employees/employee.entity";
 
 async function run() {
-  const ds = await (ormconfig as DataSource).initialize();
+  try {
+    // inicializa o DataSource
+    await ormconfig.initialize();
 
-  // 1) Empresa
-  const company = ds.getRepository(Company).create({
-    name: "Aury3 LTDA",
-    cnpj: "12.345.678/0001-90",
-    regimeTributario: "Simples Nacional",
-  });
-  await ds.getRepository(Company).save(company);
+    // 1️⃣ Empresa
+    const companyRepo = ormconfig.getRepository(Company);
+    const company = companyRepo.create({
+      name: "Aury3 LTDA",
+      cnpj: "12.345.678/0001-90",
+      regimeTributario: "Simples Nacional",
+    });
+    await companyRepo.save(company);
 
-  // 2) Usuário OWNER
-  const passwordHash = await bcrypt.hash("aury123", 10);
-  const user = ds.getRepository(User).create({
-    name: "Michael (Owner)",
-    email: "owner@aury3.dev",
-    passwordHash,
-    role: UserRole.OWNER, // << usa o enum aqui
-    companyId: company.id,
-  });
-  await ds.getRepository(User).save(user);
+    // 2️⃣ Usuário OWNER
+    const userRepo = ormconfig.getRepository(User);
+    const passwordHash = await bcrypt.hash("aury123", 10);
+    const user = userRepo.create({
+      name: "Michael (Owner)",
+      email: "owner@aury3.dev",
+      passwordHash,
+      role: UserRole.OWNER,
+      companyId: company.id,
+    });
+    await userRepo.save(user);
 
-  // 3) Funcionário vinculado (opcional)
-  const emp = ds.getRepository(Employee).create({
-    name: "Funcionário Teste",
-    model: "CLT",
-    baseSalary: "4500.00",
-    admissionDate: new Date(),
-    companyId: company.id,
-    userId: null,
-  });
-  await ds.getRepository(Employee).save(emp);
+    // 3️⃣ Funcionário
+    const employeeRepo = ormconfig.getRepository(Employee);
+    const emp = employeeRepo.create({
+      name: "Funcionário Teste",
+      model: "CLT",
+      baseSalary: "4500.00",
+      admissionDate: new Date(),
+      companyId: company.id,
+      userId: null,
+    });
+    await employeeRepo.save(emp);
 
-  console.log("✅ Seed concluído:", {
-    company: company.id,
-    user: user.id,
-    employee: emp.id,
-  });
-  await ds.destroy();
+    console.log("✅ Seed concluído com sucesso:");
+    console.table({
+      company: company.id,
+      user: user.id,
+      employee: emp.id,
+    });
+  } catch (error) {
+    console.error("❌ Erro no seed:", error);
+  } finally {
+    await ormconfig.destroy();
+  }
 }
 
-run().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+run();
