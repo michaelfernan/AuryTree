@@ -1,0 +1,288 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+enum BeneficiaryType {
+  EMPLOYEE
+  GOV
+  THIRDPARTY
+}
+
+type CompanyType {
+  cnpj: String!
+  createdAt: DateTime!
+  employees: [Employee!]
+  expenses: [Expense!]
+  id: ID!
+  invoices: [Invoice!]
+  name: String!
+  payments: [Payment!]
+  payrollItems: [PayrollItem!]
+  regimeTributario: String
+  users: [User!]
+}
+
+"""Dados para criação de uma nova empresa"""
+input CreateCompanyInput {
+  """CNPJ da empresa (único)"""
+  cnpj: String!
+
+  """Nome da empresa"""
+  name: String!
+}
+
+input CreateEmployeeInput {
+  """Data de admissão (YYYY-MM-DD)"""
+  admissionDate: String
+
+  """Salário base (numeric como string)"""
+  baseSalary: String
+
+  """Empresa (companyId)"""
+  companyId: ID!
+
+  """Modelo de contrato: CLT | PJ | HORA..."""
+  model: String
+  name: String!
+
+  """User opcional vinculado"""
+  userId: ID
+}
+
+input CreateExpenseInput {
+  amount: String!
+  category: String
+  companyId: ID!
+  description: String!
+  dueDate: String
+  invoiceId: String
+  origin: ExpenseOrigin
+  paidAt: String
+}
+
+input CreateInvoiceInput {
+  companyId: ID!
+  issueDate: String!
+  nfeKey: String
+  partnerCnpj: String
+  total: String!
+  type: InvoiceType!
+}
+
+input CreatePaymentInput {
+  beneficiaryType: BeneficiaryType
+  companyId: ID!
+  competence: String
+  employeeId: String
+  expenseId: String
+  grossAmount: String!
+  netAmount: String!
+  paidAt: String
+  source: PaymentSource
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Employee {
+  admissionDate: DateTime
+
+  """Salário base em formato numérico (string para precisão)"""
+  baseSalary: String!
+  company: CompanyType!
+  companyId: String!
+  createdAt: DateTime!
+  id: ID!
+
+  """Modelo de contrato: CLT, PJ, HORA..."""
+  model: String!
+  name: String!
+  payments: [Payment!]
+  payrollItems: [PayrollItem!]
+  user: User
+  userId: String
+}
+
+type Expense {
+  amount: String!
+  category: String
+  company: CompanyType!
+  companyId: String!
+  createdAt: DateTime!
+  description: String!
+  dueDate: DateTime
+  id: ID!
+  invoiceId: String
+  origin: ExpenseOrigin!
+  paidAt: DateTime
+  payments: [Payment!]
+}
+
+enum ExpenseOrigin {
+  INVOICE
+  MANUAL
+}
+
+enum ImportStatus {
+  IMPORTED
+  VALIDATED
+}
+
+type Invoice {
+  company: CompanyType!
+  companyId: String!
+  createdAt: DateTime!
+  id: ID!
+  issueDate: DateTime!
+  nfeKey: String
+  partnerCnpj: String
+  rawXml: String
+  status: ImportStatus!
+  total: String!
+  type: InvoiceType!
+}
+
+enum InvoiceType {
+  ENTRADA
+  SAIDA
+}
+
+type Mutation {
+  """Cria uma nova empresa"""
+  createCompany(input: CreateCompanyInput!): CompanyType!
+  createEmployee(input: CreateEmployeeInput!): Employee!
+  createExpense(input: CreateExpenseInput!): Expense!
+  createInvoice(input: CreateInvoiceInput!): Invoice!
+  createPayment(input: CreatePaymentInput!): Payment!
+
+  """Remove uma empresa pelo ID"""
+  deleteCompany(id: ID!): Boolean!
+  deletePayment(id: ID!): Boolean!
+  generatePayroll(companyId: ID!, competence: String!): [PayrollItem!]!
+
+  """Atualiza dados de uma empresa existente"""
+  updateCompany(input: UpdateCompanyInput!): CompanyType!
+  updateEmployee(input: UpdateEmployeeInput!): Employee!
+  updatePayment(input: UpdatePaymentInput!): Payment!
+}
+
+type Payment {
+  beneficiaryType: BeneficiaryType!
+  company: CompanyType!
+  companyId: String!
+
+  """Competência YYYY-MM, se aplicável"""
+  competence: String
+  createdAt: DateTime!
+  employee: Employee
+  employeeId: String
+  expense: Expense
+  expenseId: String
+
+  """Valor bruto (numeric armazenado como string)"""
+  grossAmount: String!
+  id: ID!
+
+  """Valor líquido (numeric armazenado como string)"""
+  netAmount: String!
+  paidAt: DateTime
+  source: PaymentSource!
+}
+
+enum PaymentSource {
+  COMPANY
+  OWNER
+}
+
+type PayrollItem {
+  company: CompanyType!
+  companyId: String!
+  competence: String!
+  createdAt: DateTime!
+  employee: Employee!
+  employeeId: String!
+  fgts: String!
+  gross: String!
+  id: ID!
+  inss: String!
+  net: String!
+}
+
+type Query {
+  """Lista todas as empresas cadastradas"""
+  companies: [CompanyType!]!
+
+  """Busca uma empresa pelo ID"""
+  company(id: ID!): CompanyType
+  employees(companyId: ID!): [Employee!]!
+  expenses(companyId: ID!): [Expense!]!
+  invoices(companyId: ID!): [Invoice!]!
+  payment(id: ID!): Payment
+  payments(companyId: ID!): [Payment!]!
+  payrollItem(id: ID!): PayrollItem
+  payrollItems(companyId: ID!): [PayrollItem!]!
+}
+
+"""Dados para atualização de uma empresa existente"""
+input UpdateCompanyInput {
+  """CNPJ da empresa (único)"""
+  cnpj: String
+
+  """Identificador único da empresa"""
+  id: ID!
+
+  """Nome da empresa"""
+  name: String
+}
+
+input UpdateEmployeeInput {
+  """Data de admissão (YYYY-MM-DD)"""
+  admissionDate: String
+
+  """Salário base (numeric como string)"""
+  baseSalary: String
+
+  """Empresa (companyId)"""
+  companyId: ID
+  id: ID!
+
+  """Modelo de contrato: CLT | PJ | HORA..."""
+  model: String
+  name: String
+
+  """User opcional vinculado"""
+  userId: ID
+}
+
+input UpdatePaymentInput {
+  beneficiaryType: BeneficiaryType
+  companyId: ID
+  competence: String
+  employeeId: String
+  expenseId: String
+  grossAmount: String
+  id: ID!
+  netAmount: String
+  paidAt: String
+  source: PaymentSource
+}
+
+type User {
+  company: CompanyType
+  companyId: String
+  createdAt: DateTime!
+  email: String!
+  employee: Employee
+  id: ID!
+  name: String!
+  role: UserRole!
+}
+
+enum UserRole {
+  ACCOUNTANT
+  ADMIN
+  EMPLOYEE
+  OWNER
+}
